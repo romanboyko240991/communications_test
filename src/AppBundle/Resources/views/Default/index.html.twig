@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Communications{% endblock %}
+
+{% block body %}
+    <div class="row text-center">
+        <a href="{{ path('communications') }}" class="btn btn-primary">Communication</a>
+
+        {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('settings') }}" class="btn btn-danger">Settings</a>
+        {% endif %}
+    </div>
+{% endblock %}

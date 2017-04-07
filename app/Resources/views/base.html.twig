@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>{% block title %}Welcome!{% endblock %}</title>
+    {% block stylesheets %}{% endblock %}
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('components/bootstrap/dist/css/bootstrap.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('style/style.css') }}"/>
+    <script type="text/javascript" src="{{ asset('components/vue/dist/vue.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('components/vue-resource/dist/vue-resource.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('components/Sortable/Sortable.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('components/vue.draggable/dist/vuedraggable.min.js') }}"></script>
+</head>
+<body>
+<div class="row logo">
+    <div class="home-link"><a href="{{ path('homepage') }}"><i class="glyphicon glyphicon-home"></i></a></div>
+    <div class="user-info">
+        {% if app.user %}
+            You logged in as {{ app.user }} <a href="/logout">[logout <i class="glyphicon glyphicon-log-out"></i>]</a>
+        {% else %}
+        {% endif %}
+    </div>
+</div>
+<div class="container">
+    {% block body %}{% endblock %}
+    {% block javascripts %}{% endblock %}
+</div>
+</body>
+</html>

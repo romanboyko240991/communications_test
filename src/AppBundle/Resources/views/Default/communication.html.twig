@@ -1,0 +1,141 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Communications page{% endblock %}
+
+{% block body %}
+    {#MODAL DIALOG#}
+    <script type="text/x-template" id="modal-template">
+        <transition name="modal">
+            <div class="modal-mask">
+                <div class="modal-wrapper">
+                    <div class="modal-container">
+                        <div class="modal-body">
+                            <slot name="body">
+                                Success!!!
+                            </slot>
+                        </div>
+
+                        <div class="modal-footer">
+                            <slot name="footer">
+                                <button class="modal-default-button btn btn-success" @click="$emit('close')">OK</button>
+                            </slot>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+    </script>
+
+    <div id="modal-app">
+        <modal v-if="showModal" @close="showModal = false">
+        </modal>
+    </div>
+    {#END OF MODAL DIALOG#}
+
+    <div class="row text-center">
+        <div id="main">
+            <div class="drag">
+                <h2>Tags</h2>
+                {% if privilegy == 'edit' %}<draggable class="dragArea panel panel-default" v-model="list1" :options="{group:'people'}" @change="log">{% endif %}
+                    <div class="tag" v-for="(element, index) in list1">
+                        {% raw %}{{element.name}}{% endraw %}
+                    </div>
+                    {% if privilegy == 'edit' %}</draggable>{% endif %}
+
+                <h2>Fields</h2>
+                {% if privilegy == 'edit' %}<draggable class="dragArea panel panel-default" v-model="list2" :options="{group:'people'}" @change="log">{% endif %}
+                    <div class="field" v-for="(element, index) in list2" :key="index">{% raw %}{{element.name}}{% endraw %}
+                        {% if privilegy == 'edit' %}
+                            <button class="btn btn-warning" v-on:click="removeField(list2, index)">Remove</button>
+                        {% endif %}
+                    </div>
+                    {% if privilegy == 'edit' %}</draggable>{% endif %}
+
+                <div class="row">
+                    {% if privilegy == 'edit' %}
+                        <button class="btn btn-primary" v-on:click="saveFields()">Save</button>
+                    {% endif %}
+                    {% if privilegy != 'read' %}
+                        <button class="btn btn-danger" v-on:click="deleteFields()">Delete</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="text/javascript">
+        function getNewGeneralItems() {
+            return [{name:"Email", id:1, value: '{{ email }}'},
+                {name:"Username", id:2, value: '{{ username }}'},
+                {name:"Created at", id:3, value: '{{ createdAt }}'} ];
+        }
+
+        new Vue({
+            el: "#main",
+            mounted: function () {
+                this.$http.get("{{ path('get_user_fields') }}").then(function (response) {
+                    this.list2 = response.body;
+                });
+            },
+            data: {
+                list1: getNewGeneralItems(),
+                list2:[]
+            },
+            methods:{
+                log: function (evt){
+                    if('added' in evt) {
+                        var currentName = evt.added.element.name;
+                        if(currentName == 'Email' || currentName == 'Username' || currentName == 'Created at') {
+                            evt.added.element.name += ': ' + evt.added.element.value;
+                        }
+                        else {
+
+                        }
+
+                        this.list1 = getNewGeneralItems();
+                    }
+                },
+                removeField: function(fields, index) {
+                    fields.splice(index, 1);
+                },
+                saveFields: function() {
+                    console.log(this.list2)
+                    this.$http.post("{{ path('save_fields') }}", this.list2, {
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            }
+                    ).then(function (response) {
+                                if (response.status == 200) {
+                                    modal.showModal = true;
+                                }
+                            }
+                    );
+                },
+                deleteFields: function() {
+                    this.list2 = [];
+
+                    this.$http.post("{{ path('delete_user_fields') }}").then(function (response) {
+                                if (response.status == 200) {
+                                    modal.showModal = true;
+                                }
+                            }
+                    );
+                }
+            }
+        });
+
+        Vue.component('modal', {
+            template: '#modal-template'
+        });
+
+        var modal = new Vue({
+            el: '#modal-app',
+            data: {
+                showModal: false
+            }
+        })
+    </script>
+{% endblock %}
